@@ -6,7 +6,7 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2023 STMicroelectronics.
+  * Copyright (c) 2024 STMicroelectronics.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
@@ -21,6 +21,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include<stdio.h>
+#include<string.h>
 
 /* USER CODE END Includes */
 
@@ -31,6 +33,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -68,8 +71,7 @@ static void MX_USART2_UART_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	uint32_t mq2value;
-	uint32_t tempLM35;
+
 
   /* USER CODE END 1 */
 
@@ -79,7 +81,9 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-  char uartBuffer[50];
+     int value;
+  	float lm35value;
+  	float ctemp;
 
   /* USER CODE END Init */
 
@@ -107,21 +111,21 @@ int main(void)
     /* USER CODE BEGIN 3 */
 	  HAL_ADC_Start(&hadc1);
 	  HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
-	  mq2value = HAL_ADC_GetValue(&hadc1);
+	  value = HAL_ADC_GetValue(&hadc1);
 	  HAL_ADC_Stop(&hadc1);
+	  char buffer[20];
+	  sprintf(buffer, "ADC Value: %d\r\n", value);
+	  HAL_UART_Transmit(&huart2, (uint8_t *)buffer, strlen(buffer), HAL_MAX_DELAY);
 	  HAL_ADC_Start(&hadc1);
 	  HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
-	  tempLM35=HAL_ADC_GetValue(&hadc1);
-	  float temperature=(tempLM35 * 3300.0 / 4095.0) / 10.0;
-	  HAL_ADC_Stop(&hadc1);
-
-	  sprintf(uartBuffer, "LM35 Value: %.lu, MQ2 Value: %d\r\n", temperature, mq2value);
-	  HAL_UART_Transmit(&huart2, (uint8_t *)uartBuffer, strlen(uartBuffer), HAL_MAX_DELAY);
-	  HAL_Delay(2000);
-
+	  lm35value = HAL_ADC_GetValue(&hadc1);
+	  ctemp = (lm35value * 3.3f / 4095) * 100.0f;
+	  sprintf(buffer, "lm35 Value: %.2f\r\n", ctemp);
+	  HAL_UART_Transmit(&huart2, (uint8_t *)buffer, strlen(buffer), HAL_MAX_DELAY);
+	  HAL_Delay(1000);
+	  }
   }
   /* USER CODE END 3 */
-}
 
 /**
   * @brief System Clock Configuration
